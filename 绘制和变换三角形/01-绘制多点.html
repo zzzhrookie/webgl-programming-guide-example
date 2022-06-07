@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <canvas id="webgl" width="400" height="400"></canvas>
+</body>
+</html>
+<script>
+  const canvas = document.querySelector('#webgl')
+  const gl = canvas.getContext('webgl')
+
+  const vSource = `
+    attribute vec4 a_Position;
+    void main() {
+      gl_Position = a_Position;
+      gl_PointSize = 10.0;
+    }
+  `
+
+  const fSource = `
+    void main () {
+      gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+  `
+  initShaders(gl, vSource, fSource)
+
+  const a_Position = gl.getAttribLocation(gl.program, 'a_Position')
+
+
+  const n = initvertexBuffer(gl)
+
+  gl.clearColor(0, 0, 0, 1)
+  gl.clear(gl.COLOR_BUFFER_BIT)
+  
+  gl.drawArrays(gl.POINTS, 0, 3)
+
+
+
+  function initvertexBuffer(gl) {
+    const vertices = new Float32Array([
+      0.0, 0.5, -0.5, -0.5, 0.5, -0.5
+    ])
+
+    const n = vertices.length / 2
+    // 创建缓冲区对象
+    const vertexBuffer = gl.createBuffer()
+    // 将缓冲区对象绑定到目标
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
+    // 向缓冲区对象中写入数据
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+
+    // 将缓冲区对象分配给a_Position变量
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0)
+    // 连接a_Position 变量与分配给它的缓冲区对象
+    gl.enableVertexAttribArray(a_Position)
+    return n
+  }
+
+
+  function initShaders(gl, vSource, fSource) {
+    // 创建程序对象
+    const program = gl.createProgram()
+    // 创建着色器对象
+    const vertexShader = loaderShader(gl, gl.VERTEX_SHADER, vSource)
+    const fragmentShader = loaderShader(gl, gl.FRAGMENT_SHADER, fSource)
+    // 着色器对象装入程序对象
+    gl.attachShader(program, vertexShader)
+    gl.attachShader(program, fragmentShader)
+
+    // 程序对象连接webgl上下文
+    gl.linkProgram(program)
+    // 启动程序对象
+    gl.useProgram(program)
+
+    gl.program = program
+
+    return true
+  }
+
+  function loaderShader(gl, type, source) {
+    // 根据类型创建着色器对象
+    const shader = gl.createShader(type)
+    // 绑定源文件
+    gl.shaderSource(shader, source)
+    // 编译着色器
+    gl.compileShader(shader)
+
+    return shader
+  }
+</script>
