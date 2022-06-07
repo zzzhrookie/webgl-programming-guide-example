@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <canvas id="webgl" width="400" height="400"></canvas>
+</body>
+</html>
+<script>
+  const canvas = document.querySelector('#webgl')
+  const gl = canvas.getContext('webgl')
+
+  const vSource = `
+    attribute vec4 a_Position;
+    uniform mat4 u_ScaleMatrix;
+    void main() {
+      gl_Position = u_ScaleMatrix * a_Position;
+    }
+  `
+
+  const fSource = `
+    void main() {
+      gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+  `
+  initShaders(gl, vSource, fSource)
+
+  const a_Position = gl.getAttribLocation(gl.program, 'a_Position')
+  const u_ScaleMatrix = gl.getUniformLocation(gl.program, 'u_ScaleMatrix')
+
+  initVertexBuffer(gl)
+
+  function initShaders(gl, vSource, fSource) {
+    const program = gl.createProgram()
+    const vertexShader = loaderShader(gl, gl.VERTEX_SHADER, vSource)
+    const fragmentShader = loaderShader(gl, gl.FRAGMENT_SHADER, fSource)
+    gl.attachShader(program, vertexShader) 
+    gl.attachShader(program, fragmentShader)
+
+    gl.linkProgram(program)
+    gl.useProgram(program)
+
+    gl.program = program
+
+    return true
+  }
+
+  function loaderShader(gl, type, source) {
+    const shader = gl.createShader(type)
+    gl.shaderSource(shader, source)
+    gl.compileShader(shader)
+
+    return shader
+  }
+  
+  function createMatrix(Sx, Sy) {
+    const matrix = new Float32Array([
+      Sx,  0,  0,  0,
+      0,   Sy, 0,  0,
+      0,   0,  1,  0,
+      0,   0,  0,  1
+    ])
+
+    return matrix
+  }
+
+  function initVertexBuffer(gl) {
+    const vertices = new Float32Array([
+      -0.5, 0.3,
+      -0.3, 0,
+      0.3, 0
+    ])
+
+    const vertexBuffer = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+    gl.vertexAttribPointer(u_ScaleMatrix, 2, gl.FLOAT, false, 0, 0)
+    gl.enableVertexAttribArray(u_ScaleMatrix)
+  }
+
+  let Sx = 1, Sy = 1
+  !(function ni() {
+    if (Sx > 3) {
+      Sx = 0.4
+    }
+    if (Sy > 3) {
+      Sy = 0.4
+    }
+    Sx += 0.01
+    Sy += 0.01
+
+    const matrix = createMatrix(Sx, Sy)
+    gl.uniformMatrix4fv(u_ScaleMatrix, false, matrix)
+    gl.clearColor(0, 0, 0, 1)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    gl.drawArrays(gl.TRIANGLES, 0, 3)
+
+    requestAnimationFrame(ni)
+  })()
+
+  
+</script>
