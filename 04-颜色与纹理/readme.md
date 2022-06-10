@@ -9,3 +9,10 @@
   2. 为几何图形配置纹理映射方式
   3. 加载纹理图像， 对其进行一些配置，以在WebGL中使用
   4. 在片元着色器中将相应的纹素从纹理中抽取出来，并将纹素的颜色赋给片元
+
+#### 将纹理图像分配给纹理对象
+  gl.texImage2D(target, level, internalformat, format, type, image)
+ ```
+  将image指定的图像分配给绑定到目标上的纹理对象
+ ```
+ - format 表示纹理数据的格式  jpg - RGB   png - RGBA   bmp - RGB
